@@ -2,6 +2,7 @@ from pathlib import Path
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 
+# 'sqlite:///:memory:'
 
 BASE_DIR = Path(__file__).parent
 DATABASE_NAME = 'db.sqlite'
@@ -9,12 +10,43 @@ DATABASE_PATH = BASE_DIR / 'database' / DATABASE_NAME
 DATABASE_URI = 'sqlite:///' + str(DATABASE_PATH)
 
 # print(BASE_DIR, DATABASE_PATH, DATABASE_URI)
-engine = create_engine(DATABASE_URI)
+engine = create_engine(DATABASE_URI, echo=True)
 # print(engine)
 session_factory = sessionmaker()
 session_factory.configure(bind=engine)
 
 
-
+IDOL_DICT = {
+    'WJSN': [
+        'Seola',
+        'Xuanyi',
+        'Bona',
+        'Exy',
+        'Soobin',
+        'Luda',
+        'Dawon',
+        'Eunseo',
+        'Chengxiao',
+        'Meiqi',
+        'Yeoreum',
+        'Dayoung',
+        'Yeonjung',
+    ],
+    'fromis_9': [
+        'Saerom',
+    ],
+    'Red Velvet': [
+        'Irene',
+        'Wendy',
+        'Seulgi',
+    ],
+    'Rocket Girls': [
+        'Zining',
+    ],
+    'IZONE': [
+        'Yujin',
+        'Yena',
+    ],
+}
 
 

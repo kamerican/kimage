@@ -1,24 +1,12 @@
-from sqlalchemy import create_engine
-engine = create_engine('sqlite:///:memory:', echo=True)
-
-
-
-
-
-
-
-
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, PickleType
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
 
 from pathlib import Path
-import kimage.constant
+from kimage import constant
 
 Base = declarative_base()
-
-
 
 class Group(Base):
     """
@@ -66,7 +54,7 @@ class Picture(Base):
     """
     # Attributes
     __tablename__ = 'picture'
-    picture_dir = kimage.constant.BASE_DIR / 'database' / 'picture'
+    picture_dir = constant.BASE_DIR / 'database' / 'picture'
     
     # Descriptors
     id = Column(Integer, primary_key=True)
@@ -100,7 +88,7 @@ class Face(Base):
     """
     # Attributes
     __tablename__ = 'face'
-    face_dir = kimage.constant.BASE_DIR / 'database' / 'face'
+    face_dir = constant.BASE_DIR / 'database' / 'face'
 
     # Descriptors
     id = Column(Integer, primary_key=True)
@@ -128,4 +116,11 @@ class Face(Base):
     # Public
     def __repr__(self):
         return '<Face: {0}>'.format(self.identity)
+
+
+
+
+
+
+
 
