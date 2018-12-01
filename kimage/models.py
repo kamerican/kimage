@@ -24,7 +24,6 @@ class Group(Base):
     # Public
     def __repr__(self):
         return '<Group: {0}>'.format(self.name)
-
 class Identity(Base):
     """
     Table of identities.
@@ -47,7 +46,6 @@ class Identity(Base):
             self.name,
             self.group.name,
         )
-
 class Picture(Base):
     """
     Table of pictures.
@@ -81,7 +79,6 @@ class Picture(Base):
     # Public
     def __repr__(self):
         return '<Picture: {0}>'.format(self.filename)
-
 class Face(Base):
     """
     Table of faces.

@@ -10,7 +10,6 @@ def create_db():
     if not constant.DATABASE_PATH.is_file():
         print("Creating database...")
         Base.metadata.create_all(constant.engine)
-
 def refresh_idols():
     """
     Clears tables and adds idols.
@@ -25,7 +24,9 @@ def refresh_idols():
     add_idols(constant.IDOL_DICT)
     return
 def add_idols(idol_dict):
-    """Add idols to db from a list of strings."""
+    """
+    Add idols to db from a list of strings.
+    """
     groups = idol_dict.keys()
     for group_name in groups:
         # Add group
@@ -33,7 +34,7 @@ def add_idols(idol_dict):
         group.name = group_name
         print("Adding:", group)
         session.add(group)
-        
+
         # Add members of the group
         members = idol_dict[group_name]
         for member in members:
@@ -42,18 +43,29 @@ def add_idols(idol_dict):
             identity.name = member
             print("Adding:", identity)
             session.add(identity)
-    session.commit()
     return
 def clear_table(table_class):
-    """Clears the db table parameter."""
-    query_list = table_class.query.all()
+    """
+    Clears the db table parameter.
+    """
+    query_list = session.query(table_class).all()
     if query_list:
         for query in query_list:
             print("Removing:", query)
             session.delete(query)
-    session.commit()
     return
-
+def exit():
+    """
+    Commit changes and close the session connection.
+    """
+    session.commit()
+    session.close()
+def revert():
+    """
+    Rollback changes and close the session connection.
+    """
+    session.rollback()
+    session.close()
 
 
 
