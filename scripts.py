@@ -22,7 +22,6 @@ def refresh_idols():
 
     # Add idols
     add_idols(constant.IDOL_DICT)
-    return
 def add_idols(idol_dict):
     """
     Add idols to db from a list of strings.
@@ -43,7 +42,6 @@ def add_idols(idol_dict):
             identity.name = member
             print("Adding:", identity)
             session.add(identity)
-    return
 def clear_table(table_class):
     """
     Clears the db table parameter.
@@ -53,8 +51,7 @@ def clear_table(table_class):
         for query in query_list:
             print("Removing:", query)
             session.delete(query)
-    return
-def exit():
+def save():
     """
     Commit changes and close the session connection.
     """
@@ -66,9 +63,3 @@ def revert():
     """
     session.rollback()
     session.close()
-
-
-
-
-
-

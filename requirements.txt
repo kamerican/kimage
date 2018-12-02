@@ -15,6 +15,8 @@ lxml==4.2.5
 Mako==1.0.7
 MarkupSafe==1.1.0
 mccabe==0.6.1
+numpy==1.15.4
+opencv-python==3.4.4.19
 parse==1.9.0
 pyee==5.0.0
 pylint==2.2.1

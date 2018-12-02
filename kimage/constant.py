@@ -48,5 +48,3 @@ IDOL_DICT = {
         'Yena',
     ],
 }
-
-
