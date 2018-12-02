@@ -15,6 +15,8 @@ engine = create_engine(DATABASE_URI, echo=False)
 session_factory = sessionmaker()
 session_factory.configure(bind=engine)
 
+# session = session_factory()
+# print(type(session))
 
 IDOL_DICT = {
     'WJSN': [

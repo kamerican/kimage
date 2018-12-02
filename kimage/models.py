@@ -66,18 +66,16 @@ class Picture(Base):
         if self._filename is None:
             return None
         return self.picture_dir / self._filename
-
     @filepath.setter
     def filepath(self, path):
         self._filename = path.name
-
-    # @filepath.expression
-    # def filepath(cls):
-    #     return cls._filepath
+    @filepath.expression
+    def filepath(self):
+        return self._filename
 
     # Public
     def __repr__(self):
-        return '<Picture: {0}>'.format(self.filename)
+        return '<Picture: {0}>'.format(self._filename)
 class Face(Base):
     """
     Table of faces.

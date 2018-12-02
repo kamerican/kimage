@@ -1,5 +1,6 @@
 from pathlib import Path
-import cv2
+import itertools
+# import cv2
 
 
 class Manager():
@@ -14,15 +15,16 @@ class Manager():
         self.face_dir = database_dir / 'face'
 
     ### Public methods
-    def get_image_glob_list(self, dir_path):
+    def get_image_glob(self, dir_path):
         """
-        Returns a list of images in a given image directory.
+        Returns a generator of images in a given image directory.
         """
-        image_path_list = []
+        glob_gen_list = []
         for image_extension in self.image_extension_list:
             pattern = '*.' + image_extension
-            image_path_list.extend(dir_path.glob(pattern))
-        return image_path_list
+            glob_gen = dir_path.glob(pattern)
+            glob_gen_list.append(glob_gen)
+        return itertools.chain.from_iterable(glob_gen_list)
 
     # def resize_images(self, images_to_resize_query_list):
     #     for image_to_resize in images_to_resize_query_list:
