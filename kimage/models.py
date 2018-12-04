@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, PickleType
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.ext.hybrid import hybrid_property
+# from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
 
 # from pathlib import Path
@@ -46,6 +46,37 @@ class Identity(Base):
             self.name,
             self.group.name,
         )
+
+# class Picture(Base):
+#     """
+#     Table of pictures.
+#     """
+#     # Attributes
+#     __tablename__ = 'picture'
+#     picture_dir = constant.BASE_DIR / 'database' / 'picture'
+
+#     # Descriptors
+#     id = Column(Integer, primary_key=True)
+#     _filename = Column(String)
+#     faces_extracted = Column(Boolean, default=False, nullable=False)
+#     faces = relationship('Face', back_populates='picture')
+
+#     # Properties
+#     @hybrid_property
+#     def filepath(self):
+#         if self._filename is None:
+#             return None
+#         return self.picture_dir / self._filename
+#     @filepath.setter
+#     def filepath(self, path):
+#         self._filename = path.name
+#     @filepath.expression
+#     def filepath(self):
+#         return self._filename
+
+#     # Public
+#     def __repr__(self):
+#         return '<Picture: {0}>'.format(self._filename)
 class Picture(Base):
     """
     Table of pictures.
@@ -56,26 +87,24 @@ class Picture(Base):
 
     # Descriptors
     id = Column(Integer, primary_key=True)
-    _filename = Column(String)
-    faces_extracted = Column(Boolean, default=False, nullable=False)
+    filename = Column(String)
+    height = Column(Integer)
+    width = Column(Integer)
     faces = relationship('Face', back_populates='picture')
+    faces_extracted = Column(Boolean, default=False, nullable=False)
+    is_resized = Column(Boolean, default=False, nullable=False)
 
     # Properties
-    @hybrid_property
+    @property
     def filepath(self):
-        if self._filename is None:
+        if self.filename is None:
             return None
-        return self.picture_dir / self._filename
-    @filepath.setter
-    def filepath(self, path):
-        self._filename = path.name
-    @filepath.expression
-    def filepath(self):
-        return self._filename
+        return self.picture_dir / self.filename
 
     # Public
     def __repr__(self):
-        return '<Picture: {0}>'.format(self._filename)
+        return '<Picture: {0}>'.format(self.filename)
+
 class Face(Base):
     """
     Table of faces.
@@ -87,7 +116,7 @@ class Face(Base):
     # Descriptors
     id = Column(Integer, primary_key=True)
     embedding = Column(PickleType)
-    _filename = Column(String)
+    filename = Column(String)
     identity_id = Column(Integer, ForeignKey('identity.id'))
     identity = relationship('Identity', back_populates='faces')
     picture_id = Column(Integer, ForeignKey('picture.id'))
@@ -96,15 +125,11 @@ class Face(Base):
     # add training/predicted stuff here
 
     # Properties
-    @hybrid_property
+    @property
     def filepath(self):
-        if self._filename is None:
+        if self.filename is None:
             return None
-        return self.face_dir / self._filename
-
-    @filepath.setter
-    def filepath(self, path):
-        self._filename = path.name
+        return self.face_dir / self.filename
 
     # Public
     def __repr__(self):

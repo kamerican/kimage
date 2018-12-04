@@ -10,22 +10,13 @@ def create_db():
     if not constant.DATABASE_PATH.is_file():
         print("Creating database...")
         Base.metadata.create_all(constant.engine)
-def refresh_idols():
+def add_ppl():
     """
-    Clears tables and adds idols.
+    Add groups and identities to db from a list of strings.
     """
-    # Clear tables
-    clear_table(Face)
-    clear_table(Picture)
-    clear_table(Identity)
-    clear_table(Group)
+    # @@@ Add functionality to only add new names and groups
 
-    # Add idols
-    add_idols(constant.IDOL_DICT)
-def add_idols(idol_dict):
-    """
-    Add idols to db from a list of strings.
-    """
+    idol_dict = constant.IDOL_DICT
     groups = idol_dict.keys()
     for group_name in groups:
         # Add group
