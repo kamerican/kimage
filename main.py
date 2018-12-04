@@ -37,7 +37,8 @@ def update_picture_database():
             # One or no pictures with same filename have been found in db
             if picture_match_list:
                 # Current picture already in db
-                print("Already in database:", picture_path.name)
+                # print("Already in database:", picture_path.name)
+                pass
             else:
                 # Add picture to db
                 has_new_pictures = True
