@@ -9,6 +9,9 @@ DATABASE_NAME = 'db.sqlite'
 DATABASE_PATH = BASE_DIR / 'database' / DATABASE_NAME
 DATABASE_URI = 'sqlite:///' + str(DATABASE_PATH)
 
+PICTURE_FILE_STRING_LENGTH = 19
+PICTURE_NAME_STRING_LENGTH = 15
+
 # print(BASE_DIR, DATABASE_PATH, DATABASE_URI)
 engine = create_engine(DATABASE_URI, echo=False)
 # print(engine)

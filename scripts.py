@@ -10,29 +10,31 @@ def create_db():
     if not constant.DATABASE_PATH.is_file():
         print("Creating database...")
         Base.metadata.create_all(constant.engine)
-def add_ppl():
+        add_constants()
+def add_constants():
     """
     Add groups and identities to db from a list of strings.
     """
-    # @@@ Add functionality to only add new names and groups
-
     idol_dict = constant.IDOL_DICT
     groups = idol_dict.keys()
     for group_name in groups:
         # Add group
-        group = Group()
-        group.name = group_name
-        print("Adding:", group)
-        session.add(group)
-
+        group_match = session.query(Group).filter_by(name=group_name).one_or_none()
+        if not group_match:
+            group = Group()
+            group.name = group_name
+            print("Adding:", group)
+            session.add(group)
         # Add members of the group
         members = idol_dict[group_name]
         for member in members:
-            identity = Identity()
-            identity.group = group
-            identity.name = member
-            print("Adding:", identity)
-            session.add(identity)
+            identity_match = session.query(Identity).filter_by(name=member).one_or_none()
+            if not identity_match:
+                identity = Identity()
+                identity.group = group
+                identity.name = member
+                print("Adding:", identity)
+                session.add(identity)
 def clear_table(table_class):
     """
     Clears the db table parameter.

@@ -1,21 +1,24 @@
 from pathlib import Path
+from uuid import uuid4
 import itertools
 import cv2
 from sqlalchemy.orm.exc import MultipleResultsFound
 from kimage.models import Picture
+from kimage import constant
 
 class Manager():
     """
     Class controlling images in linked to the database.
     """
-    def __init__(self, resize_factor=0.25):
+    def __init__(self, resize_factor=0.25, blocking=True):
+        database_dir = Path(__file__).parent / 'database'
+        self.blocking = blocking
         self.image_extension_list = ['jpg', 'png']
         self.resize_factor = resize_factor
-        database_dir = Path(__file__).parent / 'database'
         self.picture_dir = database_dir / 'picture'
         self.face_dir = database_dir / 'face'
         self.original_dir = database_dir / 'original'
-
+        self.rename_dir = database_dir / 'rename'
     ### Public methods
     def get_image_glob(self, dir_path):
         """
@@ -33,14 +36,11 @@ class Manager():
         i_picture = 0
         for picture_path in picture_path_chain:
             i_picture += 1
-            print("Picture #{}".format(i_picture))
             if i_picture % 1000 == 0:
                 print("Picture #{}".format(i_picture))
-            if i_picture > 40:
-                break
             try:
                 # Check if there are duplicate filenames already in db
-                picture_match_list = (
+                picture_match = (
                     session.query(Picture)
                     .filter_by(filename=picture_path.name)
                     .one_or_none()
@@ -51,32 +51,82 @@ class Manager():
                 print("Multiple pictures in database with the same filename:", picture_path.name)
             else:
                 # One or no pictures with same filename have been found in db
-                if picture_match_list:
+                if picture_match:
                     # Current picture already in db
                     # print("Already in database:", picture_path.name)
                     pass
                 else:
                     # Add picture to db
                     has_new_pictures = True
-                    image = cv2.imread(str(picture_path))
                     #print("Adding to database:", picture_path.name)
                     picture = Picture()
                     picture.filename = picture_path.name
-                    picture.height = image.shape[0]
-                    picture.width = image.shape[1]
                     session.add(picture)
-                    cv2.imshow('Preview', image)
-                    cv2.waitKey(0)
-        cv2.destroyAllWindows()
         return has_new_pictures
-
-# # Get resized image and save
-# resized_image = cv2.resize(original_image, dim)
-# resized_image_path = self.resize_dir_path / "rsz_{}".format(image_path.name)
-# if resized_image_path.is_file():
-#     print("Resized image already exists:", resized_image_path.name)
-# else:
-#     cv2.imwrite(str(resized_image_path), resized_image)
-            
-
+    def rename_images(self):
+        rename_path_chain = self.get_image_glob(self.rename_dir)
+        for rename_path in rename_path_chain:
+            # if len(rename_path.name) != constant.PICTURE_FILE_STRING_LENGTH:
+            for i_try in range(1, 5):
+                new_name = "{0}{1}".format(
+                    uuid4().hex[:constant.PICTURE_NAME_STRING_LENGTH],
+                    rename_path.suffix,
+                )
+                new_path = self.picture_dir / new_name
+                if not new_path.is_file():
+                    rename_path.rename(new_path)
+                    break
+            else:
+                print("Could not get a unique filename in {} tries...".format(i_try))
+                
+    def get_image_dimensions(self, session):
+        """
+        Save image dimensions to the database.
+        """
+        has_updated_dimensions = False
+        picture_match = (
+            session.query(Picture)
+            .filter_by(height=None)
+        )
+        if picture_match:
+            has_updated_dimensions = True
+            for picture in picture_match:
+                image = cv2.imread(str(picture.filepath))
+                picture.height = image.shape[0]
+                picture.width = image.shape[1]
+                self._show_image(image, picture.filename)
+            # cv2.destroyAllWindows()
+        return has_updated_dimensions
+    def resize_images(self, session):
+        """
+        Resize images whose size is greater than a threshold.
+        """
+        has_resized_images = False
+        size_limit = 2048**2
+        picture_match = (
+            session.query(Picture)
+            .filter_by(is_resized=False)
+        )
+        if picture_match:
+            for picture in picture_match:
+                picture_size = picture.height * picture.width
+                if picture_size > size_limit:
+                    has_resized_images = True
+                    dim = (
+                        picture.width * self.resize_factor,
+                        picture.height * self.resize_factor,
+                    )
+                    image = cv2.imread(str(picture.filepath))
+                    resize_path = str(picture.filepath)
+                    resized_image = cv2.resize(image, dim)
+                    # Move original image to original dir
+                    original_path = self.original_dir / picture.filename
+                    picture.filepath.rename(original_path)
+                    picture.is_resized = True
+                    cv2.imwrite(resize_path, resized_image)
+        return has_resized_images
     ### Private
+    def _show_image(self, image, filename):
+        cv2.imshow(filename, image)
+        if self.blocking:
+            cv2.waitKey(0)

@@ -87,7 +87,7 @@ class Picture(Base):
 
     # Descriptors
     id = Column(Integer, primary_key=True)
-    filename = Column(String)
+    filename = Column(String(constant.PICTURE_FILE_STRING_LENGTH))
     height = Column(Integer)
     width = Column(Integer)
     faces = relationship('Face', back_populates='picture')

@@ -18,7 +18,9 @@ def update_picture_database():
     if has_new_pictures:
         print("Committing database additions")
         session.commit()
-
+def rename_images_in_rename_dir():
+    manager = Manager()
+    manager.rename_images()
 
 
 parser = argparse.ArgumentParser(description='Execute different processes.')
@@ -32,5 +34,7 @@ if args.case == 0:
     download_images_from_urls_txt()
 elif args.case == 1:
     update_picture_database()
+elif args.case == 2:
+    rename_images_in_rename_dir()
 else:
     print("Unknown case number: {}".format(args.case))
