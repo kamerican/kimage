@@ -19,6 +19,7 @@ class Manager():
         self.face_dir = database_dir / 'face'
         self.original_dir = database_dir / 'original'
         self.rename_dir = database_dir / 'rename'
+        self.download_dir = database_dir / 'download'
     ### Public methods
     def get_image_glob(self, dir_path):
         """
@@ -30,7 +31,12 @@ class Manager():
             glob_gen = dir_path.glob(pattern)
             glob_gen_list.append(glob_gen)
         return itertools.chain.from_iterable(glob_gen_list)
-    def update_db_images(self, session):
+    def refresh_all_db_images(self, session):
+        """
+        Checks all images in picture dir if in the database.
+        If not, adds image to the database.
+        Takes a long time because of the number of images.
+        """
         has_new_pictures = False
         picture_path_chain = self.get_image_glob(self.picture_dir)
         i_picture = 0
@@ -58,27 +64,53 @@ class Manager():
                 else:
                     # Add picture to db
                     has_new_pictures = True
-                    #print("Adding to database:", picture_path.name)
+                    print("Adding to database:", picture_path.name)
                     picture = Picture()
                     picture.filename = picture_path.name
                     session.add(picture)
         return has_new_pictures
+    def add_new_images_to_db(self, session, source_dir):
+        """
+        Checks if images in a given directory are already in the database.
+        If not, then add image to picture table and move image into picture directory.
+        """
+        has_new_pictures = False
+        picture_path_chain = self.get_image_glob(source_dir)
+        for picture_path in picture_path_chain:
+            # Check if there are duplicate filenames already in db
+            picture_match = (
+                session.query(Picture)
+                .filter_by(filename=picture_path.name)
+                .one_or_none()
+            )
+            if not picture_match:
+                # Add picture to db
+                has_new_pictures = True
+                print("Adding to database:", picture_path.name)
+                picture = Picture()
+                picture.filename = picture_path.name
+                session.add(picture)
+                new_path = self.picture_dir / picture_path.name
+                picture_path.rename(new_path)
+        return has_new_pictures
     def rename_images(self):
-        rename_path_chain = self.get_image_glob(self.rename_dir)
-        for rename_path in rename_path_chain:
+        """
+        Renames images in the rename directory to a random 19-char string.
+        """
+        to_rename_path_chain = self.get_image_glob(self.rename_dir)
+        for to_rename_path in to_rename_path_chain:
             # if len(rename_path.name) != constant.PICTURE_FILE_STRING_LENGTH:
             for i_try in range(1, 5):
                 new_name = "{0}{1}".format(
                     uuid4().hex[:constant.PICTURE_NAME_STRING_LENGTH],
-                    rename_path.suffix,
+                    to_rename_path.suffix,
                 )
-                new_path = self.picture_dir / new_name
+                new_path = self.rename_dir / new_name
                 if not new_path.is_file():
-                    rename_path.rename(new_path)
+                    to_rename_path.rename(new_path)
                     break
             else:
                 print("Could not get a unique filename in {} tries...".format(i_try))
-                
     def get_image_dimensions(self, session):
         """
         Save image dimensions to the database.

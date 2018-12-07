@@ -11,6 +11,7 @@ def create_db():
         print("Creating database...")
         Base.metadata.create_all(constant.engine)
         add_constants()
+        # save and load embeddings to a csv with all the columns, rest of db columns can be dumped directly to csv
 def add_constants():
     """
     Add groups and identities to db from a list of strings.

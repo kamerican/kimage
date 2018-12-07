@@ -12,7 +12,7 @@ class Downloader():
         """
         Downloader constructor.
         """
-        self.download_dir = Path(__file__).parent / 'database' / 'picture'
+        self.download_dir = Path(__file__).parent / 'database' / 'download'
         self.chunk_size = chunk_size
     ### Public
     def download_from_list_of_urls(self, url_list):
