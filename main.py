@@ -38,7 +38,13 @@ def add_images_from_download_and_rename_to_database_and_picture_dir():
     if has_new_rename_images or has_new_download_images:
         print("Committing database additions")
         session.commit()
-
+def delete_selected_images():
+    session = constant.session_factory()
+    manager = Manager()
+    has_deleted_images = manager.delete_images_from_db(session)
+    if has_deleted_images:
+        print("Committing database deletions")
+        session.commit()
 
 parser = argparse.ArgumentParser(description='Execute different processes.')
 parser.add_argument(
@@ -55,5 +61,7 @@ elif args.case == 2:
     rename_images_in_rename_dir()
 elif args.case == 1:
     add_images_from_download_and_rename_to_database_and_picture_dir()
+elif args.case == 3:
+    delete_selected_images()
 else:
     print("Unknown case number: {}".format(args.case))

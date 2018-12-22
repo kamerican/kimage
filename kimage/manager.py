@@ -20,6 +20,7 @@ class Manager():
         self.original_dir = database_dir / 'original'
         self.rename_dir = database_dir / 'rename'
         self.download_dir = database_dir / 'download'
+        self.delete_dir = database_dir / 'delete'
     ### Public methods
     def get_image_glob(self, dir_path):
         """
@@ -157,6 +158,29 @@ class Manager():
                     picture.is_resized = True
                     cv2.imwrite(resize_path, resized_image)
         return has_resized_images
+    def delete_images_from_db(self, session):
+        """
+        Gets images in the delete directory.
+        Deletes those same images from the db and picture directory.
+        """
+        # count = 0
+        has_deleted_images = False
+        picture_path_chain = self.get_image_glob(self.delete_dir)
+        for picture_path in picture_path_chain:
+            picture_match = (
+                session.query(Picture)
+                .filter_by(filename=picture_path.name)
+                .one_or_none()
+            )
+            if picture_match and picture_match.filepath.is_file():
+                has_deleted_images = True                
+                # count += 1
+                # print(picture_match.filepath)
+                print("Deleting from database and picture directory:", picture_match.filename)
+                picture_match.filepath.unlink()
+                session.delete(picture_match)
+        # print(count)
+        return has_deleted_images
     ### Private
     def _show_image(self, image, filename):
         cv2.imshow(filename, image)
