@@ -173,7 +173,7 @@ class Manager():
                 .one_or_none()
             )
             if picture_match and picture_match.filepath.is_file():
-                has_deleted_images = True                
+                has_deleted_images = True
                 # count += 1
                 # print(picture_match.filepath)
                 print("Deleting from database and picture directory:", picture_match.filename)
