@@ -2,38 +2,45 @@ from datetime import datetime
 from kimage import constant
 
 
-def func1(picture):
+def sort_function(picture):
     return picture.stat().st_ctime
-def func2(picture):
-    return datetime.fromtimestamp(picture.stat().st_ctime)
+
+picture_number = 0
 count = 0
-old_dt = datetime.now()
+previous_datetime_string = ""
 picture_dir = constant.BASE_DIR / 'database' / 'rename'
 picture_list = list(picture_dir.glob('*'))
-l1 = sorted(picture_list, key=func1)
-l2 = sorted(picture_list, key=func2)
-for item in l1:
-    print(func2(item))
-# for index, value in enumerate(l1):
-#     if l1[index] != picture_list[index]:
-#         print(l1[index])
-#         print(l2[index])
+sorted_list = sorted(picture_list, key=sort_function)
+for picture_path in sorted_list:
+    created_datetime = datetime.fromtimestamp(picture_path.stat().st_ctime)
+    created_datetime_string = created_datetime.strftime("%y%m%d_%H%M%S")
 
-
-# for picture in picture_list:
-#     dt = 
-#     dt
-    # filename = "{}{}{}_{}"
-    # if dt.hour == old_dt.hour and dt.minute == old_dt.minute and dt.second == old_dt.second:
-    #     count += 1
-    # elif count != 0:
-    #     if count > 100:
-    #         print(count)
-    #     count = 0
-    # old_dt = dt
-    # flag += 1
-    # if flag > 1000:
-    #     break
+    if created_datetime_string == previous_datetime_string:
+        count += 1
+        if count > 999:
+            previous_datetime_string = created_datetime_string
+            raise Exception("Error: count exceeded 999 for {}".format(picture_path))
+    else:
+        # if count != 0:
+        #     print(count)
+        count = 0
+    rename_string = "{0}_{1}{2}".format(
+        created_datetime_string,
+        str(count).zfill(3),
+        picture_path.suffix,
+    )
+    previous_datetime_string = created_datetime_string
+    rename_path = picture_dir / rename_string
+    picture_number += 1
+    # if picture_number % 500 == 0:
+    #     print(picture_number)
+    #     print(rename_path)
+    if not rename_path.is_file():
+        print("{0} -> {1}".format(
+            picture_path.name,
+            rename_path.name,
+        ))
+        picture_path.rename(rename_path)
 
 
 # import shelve
