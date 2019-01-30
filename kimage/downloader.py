@@ -103,7 +103,7 @@ class Downloader():
 
             # Check that image file name is not already in destination folder
             if download_file_path.is_file():
-                print("Already exists:", download_file_path.name)
+                print("Already exists:", str(download_file_path))
             else:
                 # Get image from image URL
                 image_response = requests.get(image_url, stream=True)
