@@ -1,10 +1,6 @@
 from pathlib import Path
-from uuid import uuid4
 import itertools
 import cv2
-from sqlalchemy.orm.exc import MultipleResultsFound
-from kimage.models import Picture
-from kimage import constant
 
 class Manager():
     """
@@ -16,11 +12,9 @@ class Manager():
         self.image_extension_list = ['jpg', 'png']
         self.resize_factor = resize_factor
         self.picture_dir = database_dir / 'picture'
-        self.face_dir = database_dir / 'face'
-        self.original_dir = database_dir / 'original'
         self.rename_dir = database_dir / 'rename'
+        self.resize_dir = database_dir / 'resize'
         self.download_dir = database_dir / 'download'
-        self.delete_dir = database_dir / 'delete'
     ### Public methods
     def get_image_glob(self, dir_path):
         """
@@ -32,12 +26,18 @@ class Manager():
             glob_gen = dir_path.glob(pattern)
             glob_gen_list.append(glob_gen)
         return itertools.chain.from_iterable(glob_gen_list)
+    ### Private
+    def _show_image(self, image, filename):
+        cv2.imshow(filename, image)
+        if self.blocking:
+            cv2.waitKey(0)
+    """
     def refresh_all_db_images(self, session):
-        """
-        Checks all images in picture dir if in the database.
-        If not, adds image to the database.
-        Takes a long time because of the number of images.
-        """
+        
+        # Checks all images in picture dir if in the database.
+        # If not, adds image to the database.
+        # Takes a long time because of the number of images.
+        
         has_new_pictures = False
         picture_path_chain = self.get_image_glob(self.picture_dir)
         i_picture = 0
@@ -71,10 +71,10 @@ class Manager():
                     session.add(picture)
         return has_new_pictures
     def add_new_images_to_db(self, session, source_dir):
-        """
-        Checks if images in a given directory are already in the database.
-        If not, then add image to picture table and move image into picture directory.
-        """
+        
+        # Checks if images in a given directory are already in the database.
+        # If not, then add image to picture table and move image into picture directory.
+        
         has_new_pictures = False
         picture_path_chain = self.get_image_glob(source_dir)
         for picture_path in picture_path_chain:
@@ -95,9 +95,9 @@ class Manager():
                 picture_path.rename(new_path)
         return has_new_pictures
     def rename_images(self):
-        """
-        Renames images in the rename directory to a random 19-char string.
-        """
+        
+        # Renames images in the rename directory to a random 19-char string.
+        
         to_rename_path_chain = self.get_image_glob(self.rename_dir)
         for to_rename_path in to_rename_path_chain:
             # if len(rename_path.name) != constant.PICTURE_FILE_STRING_LENGTH:
@@ -113,9 +113,9 @@ class Manager():
             else:
                 print("Could not get a unique filename in {} tries...".format(i_try))
     def get_image_dimensions(self, session):
-        """
-        Save image dimensions to the database.
-        """
+        
+        # Save image dimensions to the database.
+        
         has_updated_dimensions = False
         picture_match = (
             session.query(Picture)
@@ -131,9 +131,9 @@ class Manager():
             # cv2.destroyAllWindows()
         return has_updated_dimensions
     def resize_images(self, session):
-        """
-        Resize images whose size is greater than a threshold.
-        """
+        
+        # Resize images whose size is greater than a threshold.
+        
         has_resized_images = False
         size_limit = 2048**2
         picture_match = (
@@ -159,10 +159,10 @@ class Manager():
                     cv2.imwrite(resize_path, resized_image)
         return has_resized_images
     def delete_images_from_db(self, session):
-        """
-        Gets images in the delete directory.
-        Deletes those same images from the db and picture directory.
-        """
+        
+        # Gets images in the delete directory.
+        # Deletes those same images from the db and picture directory.
+        
         # count = 0
         has_deleted_images = False
         picture_path_chain = self.get_image_glob(self.delete_dir)
@@ -181,8 +181,4 @@ class Manager():
                 session.delete(picture_match)
         # print(count)
         return has_deleted_images
-    ### Private
-    def _show_image(self, image, filename):
-        cv2.imshow(filename, image)
-        if self.blocking:
-            cv2.waitKey(0)
+    """
