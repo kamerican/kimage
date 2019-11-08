@@ -10,6 +10,7 @@
 # ignore pictures
 *.jpg
 *.png
+*.jfif
 
 # ignore general files
 *.dat
