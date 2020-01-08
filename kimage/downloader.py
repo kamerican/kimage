@@ -3,6 +3,7 @@ import time
 from bs4 import BeautifulSoup
 from requests_html import HTMLSession
 import requests
+from naver_html import html as naver_html
 
 class Downloader():
     """
@@ -44,9 +45,8 @@ class Downloader():
         return
     def download_from_html(self):
         time_start = time.time()
-        from naver_html import html
         image_url_list = []
-        soup = BeautifulSoup(html, 'lxml')
+        soup = BeautifulSoup(naver_html, 'lxml')
         # print(soup.prettify())
         tag_list = soup.find_all('img', attrs={
             # 'href': '#',
@@ -58,9 +58,7 @@ class Downloader():
         for tag in tag_list:
             if "data-src" in tag.attrs:
                 image_url = tag.attrs["data-src"]
-                
                 # print(image_url)
-
                 string_cutoff_index = image_url.lower().find('?type=')
                 print(image_url[:string_cutoff_index])
                 image_url_list.append(image_url[:string_cutoff_index])
@@ -81,7 +79,6 @@ class Downloader():
                 #         image_url_list.append(image_url[:string_cutoff_index + 5])
                 #     else:
                 #         print("Error: image url does not use .jpg or .jpeg")
-                
 
 
 
